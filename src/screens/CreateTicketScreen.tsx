@@ -18,23 +18,26 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { Camera } from 'lucide-react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useDispatch } from 'react-redux';
+import { createTicket, TicketPriority } from '../redux/slice/ticketSlice';
 
 //Validation schema
 const ticketSchema = yup.object({
   title: yup.string().required('Title is required').default(''),
   category: yup.string().required('Category is required').default(''),
   description: yup.string().required('Description is required').default(''),
-  priority: yup.string().required('Priority is required').default(''),
+  priority: yup.string().oneOf(['Low', 'Medium', 'High']).default('Medium'),
+
 });
 
 export type TicketFormValues = {
   title: string;
   category: string;
   description: string;
-  priority: string;
+  priority: TicketPriority;
   attachment?: string;
   createdAt?: string;
-  status?: 'open' | 'in_progress' | 'closed';
+  status?: 'Open' | 'In_progress' | 'Closed';
 };
 
 type DashboardProps = BottomTabScreenProps<MainTabsParamList, 'Tickets'>;
@@ -47,7 +50,15 @@ const CreateTicketScreen: React.FC<DashboardProps> = ({ navigation }) => {
     formState: { errors },
   } = useForm<TicketFormValues>({
     resolver: yupResolver(ticketSchema),
+    defaultValues: {
+      priority: 'Medium',
+      title: '',
+      description: '',
+      status: 'Open',
+    },
   });
+
+  const dispatch = useDispatch();
 
   const [attachmentUri, setAttachmentUri] = useState<string | null>(null);
 
@@ -63,14 +74,19 @@ const CreateTicketScreen: React.FC<DashboardProps> = ({ navigation }) => {
   };
 
   const onSubmit = (data: TicketFormValues) => {
-    const ticketWithTime ={
-      ...data,
-      createdAt: new Date().toISOString(),
-    };
+    dispatch(
+      createTicket({
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        status: 'Open',
+        priority: data.priority,
+        attachments: attachmentUri ? [attachmentUri] : [],
+      }),
+    );
 
-    console.log('New Ticket', ticketWithTime);
     Alert.alert('Success', 'Ticket created successfully!');
-    reset(ticketSchema.cast({}));
+    reset();
     setAttachmentUri(null);
     navigation.navigate('Dashboard');
   };
@@ -85,10 +101,11 @@ const CreateTicketScreen: React.FC<DashboardProps> = ({ navigation }) => {
     { label: 'Hardware', value: 'hardware' },
   ]);
 
-  const [priorities, setPriorities] = useState([
-    { label: 'Low', value: 'low' },
-    { label: 'Medium', value: 'medium' },
-    { label: 'High', value: 'high' },
+  //const [priorityValue, setPriorityValue] = useState<TicketPriority>('medium');
+  const [priorityOptions, setPriorityOptions] = useState([
+    { label: 'Low', value: 'Low' },
+    { label: 'Medium', value: 'Medium' },
+    { label: 'High', value: 'High' },
   ]);
 
   return (
@@ -160,10 +177,10 @@ const CreateTicketScreen: React.FC<DashboardProps> = ({ navigation }) => {
             <DropDownPicker
               open={priorityOpen}
               value={value}
-              items={priorities}
+              items={priorityOptions}
               setOpen={setPriorityOpen}
-              setValue={onChange}
-              setItems={setPriorities}
+              setValue={(val) => onChange(val)}
+              setItems={setPriorityOptions}
               placeholder="Select priority"
               style={styles.dropdown}
               dropDownContainerStyle={styles.dropdownContainer}
@@ -214,7 +231,10 @@ const CreateTicketScreen: React.FC<DashboardProps> = ({ navigation }) => {
       <View style={{ marginTop: 10, alignItems: 'center' }}>
         {attachmentUri ? (
           <>
-            <Image source={{ uri: attachmentUri }} style={styles.previewImage} />
+            <Image
+              source={{ uri: attachmentUri }}
+              style={styles.previewImage}
+            />
             <Text style={{ fontSize: 12, color: '#555' }}>Attached Image</Text>
           </>
         ) : (

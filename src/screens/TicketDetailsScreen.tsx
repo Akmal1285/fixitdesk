@@ -30,7 +30,7 @@ const TicketDetailsScreen: React.FC<Props> = ({ route }) => {
 
   const statusOptions = [
     { label: 'Open', value: 'open' },
-    { label: 'In Progress', value: 'in_progree' },
+    { label: 'In Progress', value: 'in_progress' },
     { label: 'Closed', value: 'closed' },
   ];
 
@@ -51,7 +51,7 @@ const TicketDetailsScreen: React.FC<Props> = ({ route }) => {
 
   const timeSince = (isoString: string) => {
     const diffMs = Date.now() - new Date(isoString).getTime();
-    const diffMins = Math.floor(diffMs / 6000);
+    const diffMins = Math.floor(diffMs / 60000);
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins} min ago`;
     const diffHrs = Math.floor(diffMins / 60);
@@ -75,14 +75,14 @@ const TicketDetailsScreen: React.FC<Props> = ({ route }) => {
 
       <View style={styles.section}>
         <Text style={styles.label}>Priority:</Text>
-        <Text style={styles.value}>{ticket.description}</Text>
+        <Text style={styles.value}>{ticket.priority}</Text>
       </View>
 
-      {ticket.attachment && (
+      {ticket.attachments && (
         <View style={styles.section}>
           <Text style={styles.label}>Attachment:</Text>
           <Image
-            source={{ uri: ticket.attachment }}
+            source={{ uri: ticket.attachments[0] }}
             style={styles.attachment}
             resizeMode="cover"
           />
@@ -115,7 +115,7 @@ const TicketDetailsScreen: React.FC<Props> = ({ route }) => {
 export default TicketDetailsScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'flex-start' },
   title: {
     fontSize: 22,
     fontWeight: 'bold',

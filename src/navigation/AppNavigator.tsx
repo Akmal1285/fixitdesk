@@ -4,11 +4,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import LoginScreen from '../screens/LoginScreen';
 import TicketDetailsScreen from '../screens/TicketDetailsScreen';
 import MainTabs from './MainTabs';
+import { TicketFormValues } from '../screens/CreateTicketScreen';
+
 
 export type RootStackParamList = {
     Login: undefined;
     MainTabs: undefined;
-    TicketDetails: undefined;
+    TicketDetails: { ticket: TicketFormValues }; 
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
