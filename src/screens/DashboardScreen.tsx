@@ -25,9 +25,7 @@ const DashboardScreen: React.FC<DashboardProps> = () => {
     <TouchableOpacity
       style={styles.card}
       //To do: Implement navigation when card is tap
-      onPress={() =>
-        navigation.navigate('TicketDetails', { ticketId: item.id })
-      }
+      onPress={() => navigation.navigate('TicketDetails', { ticket: item })}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <Text>ID: {item.id}</Text>
@@ -52,20 +50,36 @@ const DashboardScreen: React.FC<DashboardProps> = () => {
       {/*Ticket title*/}
       <Text style={styles.ticketTitle}>{item.title}</Text>
 
-        {/*Assigned to*/}
-      <Text>Assigned: {item.assigned||'Unassigned'}</Text>
+      {/*Category */}
+      <Text>Category: {item.category || 'Null'}</Text>
+
+      {/*Assigned to*/}
+      <Text>Assigned: {item.assigned || 'Unassigned'}</Text>
 
       {/*Priority & Time*/}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between',marginTop:5 }}>
-         
-         <Text >Created on: {new Date(item.createdAt).toLocaleString()}</Text>
-         <View style={[styles.priorityBadge, { backgroundColor: item.priority === 'Low' ? '#388E3C'
-          : item.priority === 'Medium' ? '#FBC02D' : '#D32F2F',
-          }]}>
-         <Text style={styles.priorityStatus}>{item.priority}</Text>
-         </View>
-
-        
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          marginTop: 5,
+        }}
+      >
+        <Text>Created on: {new Date(item.createdAt).toLocaleString()}</Text>
+        <View
+          style={[
+            styles.priorityBadge,
+            {
+              backgroundColor:
+                item.priority === 'Low'
+                  ? '#388E3C'
+                  : item.priority === 'Medium'
+                  ? '#FBC02D'
+                  : '#D32F2F',
+            },
+          ]}
+        >
+          <Text style={styles.priorityStatus}>{item.priority}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );

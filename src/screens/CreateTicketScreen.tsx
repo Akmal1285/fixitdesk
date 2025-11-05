@@ -26,8 +26,11 @@ const ticketSchema = yup.object({
   title: yup.string().required('Title is required').default(''),
   category: yup.string().required('Category is required').default(''),
   description: yup.string().required('Description is required').default(''),
-  priority: yup.string().oneOf(['Low', 'Medium', 'High']).default('Medium'),
-
+  priority: yup
+    .string()
+    .oneOf(['Low', 'Medium', 'High'], 'Priority must be Low, Medium or High')
+    .required('Priority is required')
+    .default('Medium'),
 });
 
 export type TicketFormValues = {
@@ -37,7 +40,7 @@ export type TicketFormValues = {
   priority: TicketPriority;
   attachment?: string;
   createdAt?: string;
-  status?: 'Open' | 'In_progress' | 'Closed';
+  status?: 'Open' | 'In-Progress' | 'Closed';
 };
 
 type DashboardProps = BottomTabScreenProps<MainTabsParamList, 'Tickets'>;
@@ -53,6 +56,7 @@ const CreateTicketScreen: React.FC<DashboardProps> = ({ navigation }) => {
     defaultValues: {
       priority: 'Medium',
       title: '',
+      category: '',
       description: '',
       status: 'Open',
     },
@@ -74,6 +78,8 @@ const CreateTicketScreen: React.FC<DashboardProps> = ({ navigation }) => {
   };
 
   const onSubmit = (data: TicketFormValues) => {
+    console.log('SUBMIT data.priority =>', data.priority);
+    console.log('🟩 priority selected:', data.priority);
     dispatch(
       createTicket({
         title: data.title,
@@ -96,9 +102,9 @@ const CreateTicketScreen: React.FC<DashboardProps> = ({ navigation }) => {
   const [priorityOpen, setPriorityOpen] = useState(false);
 
   const [categories, setCategories] = useState([
-    { label: 'Network', value: 'network' },
-    { label: 'Software', value: 'software' },
-    { label: 'Hardware', value: 'hardware' },
+    { label: 'Network', value: 'Network' },
+    { label: 'Software', value: 'Software' },
+    { label: 'Hardware', value: 'Hardware' },
   ]);
 
   //const [priorityValue, setPriorityValue] = useState<TicketPriority>('medium');
@@ -148,7 +154,13 @@ const CreateTicketScreen: React.FC<DashboardProps> = ({ navigation }) => {
               value={value}
               items={categories}
               setOpen={setCategoryOpen}
-              setValue={onChange}
+              setValue={valOrCallback => {
+                const newVal =
+                  typeof valOrCallback === 'function'
+                    ? (valOrCallback as (prev: any) => any)(value)
+                    : valOrCallback;
+                onChange(newVal);
+              }}
               setItems={setCategories}
               placeholder="Select category"
               style={styles.dropdown}
@@ -179,7 +191,13 @@ const CreateTicketScreen: React.FC<DashboardProps> = ({ navigation }) => {
               value={value}
               items={priorityOptions}
               setOpen={setPriorityOpen}
-              setValue={(val) => onChange(val)}
+              setValue={valOrCallback => {
+                const newVal =
+                  typeof valOrCallback === 'function'
+                    ? (valOrCallback as (prev: any) => any)(value)
+                    : valOrCallback;
+                onChange(newVal);
+              }}
               setItems={setPriorityOptions}
               placeholder="Select priority"
               style={styles.dropdown}

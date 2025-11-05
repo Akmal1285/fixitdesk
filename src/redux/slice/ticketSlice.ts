@@ -36,16 +36,19 @@ const ticketSlice = createSlice({
           id: Math.random().toString(36).substring(2, 9),
         createdAt: new Date().toISOString(),
         attachments: action.payload.attachments ?? [],
-        status: action.payload.status ?? 'open',
-        priority: action.payload.priority ?? 'medium',
+        status: action.payload.status ?? 'Open',
+        priority: action.payload.priority ?? 'Medium',
       });
     },
     updateTicketStatus(
-      state,
+     state,
       action: PayloadAction<{ id: string; status: TicketStatus }>,
     ) {
-      const ticket = state.tickets.find(t => t.id === action.payload.id);
-      if (ticket) ticket.status = action.payload.status;
+      const { id, status } = action.payload;
+      const idx = state.tickets.findIndex((t) => t.id === id);
+      if (idx >= 0) {
+        state.tickets[idx].status = status;
+      }
     },
     addAttachment(state, action: PayloadAction<{ id: string; uri: string }>) {
       const ticket = state.tickets.find(t => t.id === action.payload.id);
