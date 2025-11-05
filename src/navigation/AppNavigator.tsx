@@ -4,11 +4,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import LoginScreen from '../screens/LoginScreen';
 import TicketDetailsScreen from '../screens/TicketDetailsScreen';
 import MainTabs from './MainTabs';
+import { Ticket } from '../redux/slice/ticketSlice';
+
 
 export type RootStackParamList = {
     Login: undefined;
     MainTabs: undefined;
-    TicketDetails: undefined;
+    TicketDetails: { ticket: Ticket }; 
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

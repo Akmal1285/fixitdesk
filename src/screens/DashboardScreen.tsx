@@ -10,60 +10,22 @@ import {
 
 import { MainTabsParamList } from '../navigation/MainTabs';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
+import { RootState } from '../redux/store/store';
+import { useSelector } from 'react-redux';
 
 type DashboardProps = BottomTabScreenProps<MainTabsParamList, 'Dashboard'>;
 
-export type Ticket = {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  time: number;
-  assigned: string;
-};
-
-const tickets: Ticket[] = [
-  {
-    id: '1',
-    title: 'Fix Printer',
-    description: 'THIS IS A TICKET. PLEASE FIX IT',
-    status: 'Open',
-    time: 24,
-    assigned: 'Jane doe',
-  },
-  {
-    id: '2',
-    title: 'Network Isssue',
-    description:
-      'THIS IS A TICKET. THIS IS A TICKET. PLEASE FIX IT .THIS IS A TICKET. PLEASE FIX IT',
-    status: 'In-Progress',
-    time: 2,
-    assigned: 'Jack dawn',
-  },
-  {
-    id: '3',
-    title: 'Install Software',
-    description: 'THIS IS A TICKET. PLEASE FIX IT',
-    status: 'Closed',
-    time: 1,
-    assigned: 'Rebecca J.',
-  },
-  {
-    id: '4',
-    title: 'Install Software',
-    description: 'THIS IS A TICKET. PLEASE FIX IT',
-    status: 'Closed',
-    time: 1,
-    assigned: 'Rebecca J.',
-  },
-];
-
 const DashboardScreen: React.FC<DashboardProps> = () => {
-  const renderTicket = ({ item }: { item: Ticket }) => (
+  const navigation = useNavigation<any>();
+
+  const tickets = useSelector((state: RootState) => state.tickets.tickets);
+
+  const renderTicket = ({ item }: { item: any }) => (
     <TouchableOpacity
       style={styles.card}
       //To do: Implement navigation when card is tap
-      //onPress={Navigation.navigate('TicketDetails')}
+      onPress={() => navigation.navigate('TicketDetails', { ticket: item })}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <Text>ID: {item.id}</Text>
@@ -84,19 +46,40 @@ const DashboardScreen: React.FC<DashboardProps> = () => {
           <Text style={styles.ticketStatus}>{item.status}</Text>
         </View>
       </View>
+
       {/*Ticket title*/}
       <Text style={styles.ticketTitle}>{item.title}</Text>
 
-      
-      {/*    
-      <Text style={{ color: '#777', fontSize: 12 }}>
-        Created on: {new Date(ticket.createdAt).toLocaleString()}
-      </Text> */}
+      {/*Category */}
+      <Text>Category: {item.category || 'Null'}</Text>
 
-      {/*Assigned & Time*/}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text>Assigned:{item.assigned}</Text>
-        <Text style={{ marginLeft: 10 }}>{item.time} hours ago</Text>
+      {/*Assigned to*/}
+      <Text>Assigned: {item.assigned || 'Unassigned'}</Text>
+
+      {/*Priority & Time*/}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          marginTop: 5,
+        }}
+      >
+        <Text>Created on: {new Date(item.createdAt).toLocaleString()}</Text>
+        <View
+          style={[
+            styles.priorityBadge,
+            {
+              backgroundColor:
+                item.priority === 'Low'
+                  ? '#388E3C'
+                  : item.priority === 'Medium'
+                  ? '#FBC02D'
+                  : '#D32F2F',
+            },
+          ]}
+        >
+          <Text style={styles.priorityStatus}>{item.priority}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -119,19 +102,25 @@ const DashboardScreen: React.FC<DashboardProps> = () => {
         {/* Open Ticket */}
         <View style={[styles.filterButton, { backgroundColor: '#7133ecff' }]}>
           <Text style={styles.filterLabel}>Open</Text>
-          <Text style={styles.filterCount}>32</Text>
+          <Text style={styles.filterCount}>
+            {tickets.filter((t: any) => t.status === 'Open').length}
+          </Text>
         </View>
 
         {/* In-Progress Ticket */}
         <View style={[styles.filterButton, { backgroundColor: '#cccc26ff' }]}>
           <Text style={styles.filterLabel}>In-Progress</Text>
-          <Text style={styles.filterCount}>10</Text>
+          <Text style={styles.filterCount}>
+            {tickets.filter((t: any) => t.status === 'In-Progress').length}
+          </Text>
         </View>
 
         {/* Closed Ticket */}
         <View style={[styles.filterButton, { backgroundColor: '#30d96bff' }]}>
           <Text style={styles.filterLabel}>Closed</Text>
-          <Text style={styles.filterCount}>25</Text>
+          <Text style={styles.filterCount}>
+            {tickets.filter((t: any) => t.status === 'Closed').length}
+          </Text>
         </View>
       </View>
 
@@ -152,7 +141,7 @@ const DashboardScreen: React.FC<DashboardProps> = () => {
       {/*Ticket lists*/}
       <FlatList
         data={tickets}
-        keyExtractor={(item: any) => item.id}
+        keyExtractor={item => item.id.toString()}
         renderItem={renderTicket}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
@@ -191,7 +180,7 @@ const styles = StyleSheet.create({
   ticketTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 6,
+    marginBottom: 3,
     marginTop: 6,
   },
   welcome: {
@@ -231,5 +220,17 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 8,
     justifyContent: 'center',
+  },
+  priorityBadge: {
+    borderRadius: 5,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    justifyContent: 'center',
+  },
+  priorityStatus: {
+    fontWeight: '600',
+    fontSize: 14,
+    textAlign: 'auto',
+    color: '#fff',
   },
 });
