@@ -10,6 +10,7 @@ import {
   ScrollView,
   Image,
   Modal,
+  TextInput,
 } from 'react-native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -48,11 +49,8 @@ const TicketDetailsScreen: React.FC<Props> = ({ route }) => {
     );
   }
 
-  const [status, setStatus] = useState(
-    ticket?.status
-      ? String(ticket.status).toLowerCase().replace(/\s+/g, '_')
-      : 'open',
-  );
+  const [status, setStatus] = useState(ticket.status);
+  const [assigned, setAssigned] = useState(ticket.assigned || '');
   const [open, setOpen] = useState(false);
   const [isImageModalVisible, setImageModalVisible] = useState(false);
 
@@ -73,11 +71,12 @@ const TicketDetailsScreen: React.FC<Props> = ({ route }) => {
 
   const handleSave = () => {
     // Dispatch action to update ticket status
-    if (ticket?.id){
+    if (ticket?.id) {
       dispatch(
         updateTicketStatus({
           id: ticket.id,
           status: status as 'Open' | 'In-progress' | 'Closed',
+          assigned,
         }),
       );
     }
@@ -159,6 +158,17 @@ const TicketDetailsScreen: React.FC<Props> = ({ route }) => {
         </View>
       )}
 
+      {/*Assigned to */}
+      <View style={styles.section}>
+        <Text style={styles.label}>Assign to:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Type assignee name..."
+          value={assigned}
+          onChangeText={setAssigned}
+        />
+      </View>
+
       {/*Status dropdown*/}
       <View style={styles.section}>
         <Text style={styles.label}>Ticket Status:</Text>
@@ -177,6 +187,14 @@ const TicketDetailsScreen: React.FC<Props> = ({ route }) => {
       {/*Change status button*/}
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>Save changes</Text>
+      </TouchableOpacity>
+
+      {/*Back button*/}
+      <TouchableOpacity
+        style={styles.navigationButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.buttonText}>Back</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -199,7 +217,7 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 12,
-    width: '100%', // make sections full width inside centered container
+    width: '100%',
     alignItems: 'flex-start',
   },
   label: {
@@ -254,7 +272,8 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#7133ec',
     paddingVertical: 12,
-    borderRadius: 8,
+    paddingHorizontal: 25,
+    borderRadius: 10,
     marginTop: 28,
   },
   buttonText: {
@@ -262,5 +281,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '600',
     fontSize: 16,
+  },
+  navigationButton: {
+    marginTop: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+    backgroundColor: '#6def36ff',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 8,
+    borderRadius: 8,
+    width: '100%',
+    marginTop: 6,
+    minHeight: 50,
+    textAlignVertical: 'top',
+    backgroundColor: '#fff',
   },
 });

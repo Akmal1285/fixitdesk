@@ -24,7 +24,6 @@ const DashboardScreen: React.FC<DashboardProps> = () => {
   const renderTicket = ({ item }: { item: any }) => (
     <TouchableOpacity
       style={styles.card}
-      //To do: Implement navigation when card is tap
       onPress={() => navigation.navigate('TicketDetails', { ticket: item })}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -145,6 +144,10 @@ const DashboardScreen: React.FC<DashboardProps> = () => {
         renderItem={renderTicket}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
+
+      {/*Floating Action Button for filtering tickets */}
+
+        
     </View>
   );
 };

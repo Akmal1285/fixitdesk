@@ -13,6 +13,7 @@ export interface Ticket {
   status: TicketStatus;
   priority: TicketPriority;
   attachments: string[];
+  assigned?: string;
 }
 
 interface TicketState {
@@ -42,13 +43,16 @@ const ticketSlice = createSlice({
     },
     updateTicketStatus(
      state,
-      action: PayloadAction<{ id: string; status: TicketStatus }>,
+      action: PayloadAction<{ id: string; status: TicketStatus; assigned?: string;}>,
     ) {
-      const { id, status } = action.payload;
+      const { id, status, assigned } = action.payload;
       const idx = state.tickets.findIndex((t) => t.id === id);
       if (idx >= 0) {
         state.tickets[idx].status = status;
+        if (assigned !== undefined) {state.tickets[idx].assigned = assigned;
+        }
       }
+
     },
     addAttachment(state, action: PayloadAction<{ id: string; uri: string }>) {
       const ticket = state.tickets.find(t => t.id === action.payload.id);
