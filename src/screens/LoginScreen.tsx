@@ -1,103 +1,177 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Image } from 'react-native';
-import { TextInput} from 'react-native-paper';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Image,
+  TextInput,
+} from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-//import { transparent } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
-
-
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { validateEmail } from '../utils';
+import { validatePassword } from '../utils';
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+} from '@react-native-firebase/auth';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPasword] = useState('');
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
-  const handleLogin = () => {
-    //Todo : replace with real auth logic
-    navigation.replace('MainTabs');
+  const handleLogin = async () => {
+    if (email && password) {
+       try {
+      // Validate email and password
+      const eErr = validateEmail(email);
+      const pErr = validatePassword(password);
+      setEmailError(eErr);
+      setPasswordError(pErr);
+
+      if (eErr || pErr) return;
+
+      // Await the Firebase login
+      const userCredential = await signInWithEmailAndPassword(
+        getAuth(),
+        email,
+        password
+      );
+
+      // To do: Access user info
+      console.log("User signed in:", userCredential.user);
+    } catch (error: any) {
+      console.error("Login error:", error.message);
+    }
+  }
   };
 
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/Logo.png')} style={styles.logo} resizeMode='contain'/>
+      {/* Logo and Headline */}
+      <Image
+        source={require('../assets/Logo.png')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <Text style={styles.greeting}>Welcome Back</Text>
       <Text style={styles.welcome}>Sign in to continue</Text>
 
+      {/* Email Input*/}
+      <View style={styles.inputRow}>
+        <Icon name="email" size={20} color="#666" style={styles.inputIcon} />
+        <TextInput
+          style={[styles.input, styles.inputWithIcon]}
+          placeholder="Email"
+          value={email}
+          onChangeText={t => {
+            setEmail(t);
+            if (emailError) setEmailError(null);
+          }}
+          onBlur={() => setEmailError(validateEmail(email))}
+          //keyboardType="email-address"
+        />
+      </View>
+      {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
-      <TextInput
-        label="Email"
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input} 
-        mode='flat'
-        underlineColor='transparent'
-        activeUnderlineColor='transparent'
-        keyboardType="email-address"
-      />
+      {/* Password Input */}
+      <View style={styles.inputRow}>
+        <Icon name="lock" size={20} color="#666" style={styles.inputIcon} />
+        <TextInput
+          style={[styles.input, styles.inputWithIcon]}
+          placeholder="Password"
+          value={password}
+          onChangeText={t => {
+            setPasword(t);
+            if (passwordError) setPasswordError(null);
+          }}
+          onBlur={() => setPasswordError(validatePassword(password))}
+          secureTextEntry
+        />
+      </View>
+      {passwordError ? (
+        <Text style={styles.errorText}>{passwordError}</Text>
+      ) : null}
 
-      <TextInput
-        label="Password"
-        value={password}
-        onChangeText={setPasword}
-        style={styles.input}
-        mode='flat'
-        underlineColor='transparent'
-        activeUnderlineColor='transparent'
-        secureTextEntry
-        
-      />
-
-    <TouchableOpacity>
+      {/* Forgot Password Link */}
+      <TouchableOpacity>
         <Text style={styles.forgot}>Forgot Password?</Text>
-    </TouchableOpacity>
+      </TouchableOpacity>
 
-
-    <TouchableOpacity style={styles.button} onPress={handleLogin}>
+      {/*Sign In Button */}
+      <TouchableOpacity
+        style={[
+          styles.button,
+          (validateEmail(email) || validatePassword(password)) &&
+            styles.buttonDisabled,
+        ]}
+        onPress={handleLogin}
+        activeOpacity={0.8}
+        disabled={!!(validateEmail(email) || validatePassword(password))}
+      >
         <Text style={styles.buttonText}> Sign In</Text>
-    </TouchableOpacity>
+      </TouchableOpacity>
 
-    <View style={{flexDirection:'row', justifyContent:'center',alignItems:'center',marginTop:6,
-        marginBottom:20,
-    }
-    }>
-        <Text style={{fontSize:14,}}>Sign in with</Text>
+      {/* Bottom Text */}
+      <View style={styles.bottomText}>
+        <Text>Don't have an account? </Text>
+        <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+          <Text style={styles.signup}>Sign Up</Text>
+        </TouchableOpacity>
+      </View>
+      {/* Separator */}
+      <View style={styles.separatorContainer}>
+        <View style={styles.line}>
+          <Text style={{ textAlign: 'center', marginVertical: 10 }}>OR</Text>
+        </View>
+      </View>
 
-        <Image source={require('../assets/google.png')}
+      {/* Social Media Sign In */}
+      <View
         style={{
-            width:30,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: 6,
+          marginBottom: 20,
+        }}
+      >
+        <Text style={{ fontSize: 14 }}>Sign in with</Text>
+
+        <Image
+          source={require('../assets/google.png')}
+          style={{
+            width: 30,
             height: 30,
             marginLeft: 10,
-            resizeMode:'contain',
-        }}
+            resizeMode: 'contain',
+          }}
         />
-        <Image source={require('../assets/apple.png')}
-        style={{
-            width:30,
-            height:30,
-            marginLeft:10,
-            resizeMode:'contain',
-        }}
-        />
-        <Image source={require('../assets/linkedin.png')}
-        style={{
-            width:30,
-            height:30,
+        <Image
+          source={require('../assets/apple.png')}
+          style={{
+            width: 30,
+            height: 30,
             marginLeft: 10,
             resizeMode: 'contain',
-        }}
+          }}
         />
-        
-    </View>
-
-     
-     <View style={styles.bottomText}>
-        <Text>Don't have an account? </Text>
-        <TouchableOpacity>
-            <Text style={styles.signup}>Sign Up</Text>
-        </TouchableOpacity>
-     </View>
+        <Image
+          source={require('../assets/linkedin.png')}
+          style={{
+            width: 30,
+            height: 30,
+            marginLeft: 10,
+            resizeMode: 'contain',
+          }}
+        />
+      </View>
     </View>
   );
 };
@@ -106,8 +180,7 @@ export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 24,
+    padding: 18,
     backgroundColor: '#ffffff',
     justifyContent: 'center',
   },
@@ -117,55 +190,90 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     color: '#212121',
   },
- greeting:{
-    textAlign:'center',
+  greeting: {
+    textAlign: 'center',
     fontSize: 30,
-    fontWeight:'700',
+    fontWeight: '700',
     marginBottom: 10,
-    color: '#1C457A'
- },
+    color: '#1C457A',
+  },
   input: {
-     height: 40,
-    borderColor: 'gray',
     borderWidth: 1,
-    paddingHorizontal: 10,
-    marginBottom: 16,
-    backgroundColor: '#ffffff',
-    borderRadius:10,
-    shadowColor:'#1c0909ff',
-    shadowOpacity:0.5,
-    shadowRadius:2,
-    borderStyle:'solid',
+    borderColor: '#ccc',
+    padding: 8,
+    borderRadius: 13,
+    width: '100%',
+    marginTop: 6,
+    minHeight: 50,
+    textAlignVertical: 'top',
+    backgroundColor: '#fff',
   },
   forgot: {
     textAlign: 'right',
     color: '#1976D2',
     marginBottom: 24,
   },
-  button:{
-    alignItems:'center',
+  button: {
+    alignItems: 'center',
     borderRadius: 15,
     marginBottom: 24,
     paddingVertical: 12,
-    backgroundColor:'#1976D2',
+    backgroundColor: '#1976D2',
   },
-  buttonText:{
-    fontWeight:'bold',
+  buttonText: {
+    fontWeight: 'bold',
     fontSize: 20,
-    color:'#fff'
+    color: '#fff',
   },
-  bottomText:{
+  bottomText: {
     flexDirection: 'row',
-    justifyContent:'center',
+    justifyContent: 'center',
   },
-  signup:{
+  signup: {
     color: '#1976D2',
     fontWeight: 'bold',
+    marginLeft: 5,
   },
   logo: {
     width: 200,
     height: 200,
     alignSelf: 'center',
     marginBottom: 10,
+    marginTop: 30,
+  },
+  line: {
+    flex: 1,
+    height: 2,
+    backgroundColor: '#cbc1c1ff',
+  },
+  separatorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 29,
+    width: '100%',
+    paddingHorizontal: 10,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 10,
+  },
+  inputIcon: {
+    position: 'absolute',
+    left: 12,
+    top: 14,
+    zIndex: 2,
+  },
+  inputWithIcon: { paddingLeft: 40 },
+  errorText: {
+    color: '#d32f2f',
+    marginTop: 4,
+    marginBottom: 6,
+    marginLeft: 12,
+    fontSize: 13,
+  },
+  buttonDisabled: {
+    backgroundColor: '#97b8df',
   },
 });

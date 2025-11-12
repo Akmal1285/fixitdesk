@@ -13,6 +13,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { Provider } from 'react-redux';
 import { store } from './src/redux/store/store';
 import SignUpScreen from './src/screens/SignUpScreen';
+import LoginScreen from './src/screens/LoginScreen';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -21,10 +22,10 @@ function App() {
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <View style={styles.container}>
-       {/* <Provider store={store}>
+       <Provider store={store}>
       <AppNavigator/>
-      </Provider> */}
-      <SignUpScreen/>
+      </Provider> 
+      {/*<SignUpScreen/>*/}
       </View>
     </SafeAreaProvider>
   );
