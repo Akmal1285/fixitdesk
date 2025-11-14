@@ -7,6 +7,10 @@ import {
   Text,
   Image,
   TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -17,6 +21,7 @@ import {
   getAuth,
   signInWithEmailAndPassword,
 } from '@react-native-firebase/auth';
+import { ActivityIndicator } from 'react-native-paper';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -25,154 +30,185 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [password, setPasword] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (email && password) {
-       try {
-      // Validate email and password
-      const eErr = validateEmail(email);
-      const pErr = validatePassword(password);
-      setEmailError(eErr);
-      setPasswordError(pErr);
+      try {
+        setLoading(true);
+        // Validate email and password
+        const eErr = validateEmail(email);
+        const pErr = validatePassword(password);
+        setEmailError(eErr);
+        setPasswordError(pErr);
 
-      if (eErr || pErr) return;
+        if (eErr || pErr) return;
 
-      // Await the Firebase login
-      const userCredential = await signInWithEmailAndPassword(
-        getAuth(),
-        email,
-        password
-      );
+        // Await the Firebase login
+        const userCredential = await signInWithEmailAndPassword(
+          getAuth(),
+          email,
+          password,
+        );
 
-      // To do: Access user info
-      console.log("User signed in:", userCredential.user);
-    } catch (error: any) {
-      console.error("Login error:", error.message);
+        // To do: Access user info
+        console.log('User signed in:', userCredential.user);
+      } catch (error: any) {
+        setLoading(false);
+        console.error('Login error:', error.message);
+        Alert.alert('Login Error : Wrong Credentials');
+      }
     }
-  }
   };
 
   return (
-    <View style={styles.container}>
-      {/* Logo and Headline */}
-      <Image
-        source={require('../assets/Logo.png')}
-        style={styles.logo}
-        resizeMode="contain"
-      />
-      <Text style={styles.greeting}>Welcome Back</Text>
-      <Text style={styles.welcome}>Sign in to continue</Text>
-
-      {/* Email Input*/}
-      <View style={styles.inputRow}>
-        <Icon name="email" size={20} color="#666" style={styles.inputIcon} />
-        <TextInput
-          style={[styles.input, styles.inputWithIcon]}
-          placeholder="Email"
-          value={email}
-          onChangeText={t => {
-            setEmail(t);
-            if (emailError) setEmailError(null);
-          }}
-          onBlur={() => setEmailError(validateEmail(email))}
-          //keyboardType="email-address"
+    <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+  >
+    <ScrollView
+      keyboardShouldPersistTaps="always"
+      contentContainerStyle={{ flexGrow: 1 }}
+    >
+      <View style={styles.container}>
+        {/* Logo and Headline */}
+        <Image
+          source={require('../assets/Logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
         />
-      </View>
-      {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+        <Text style={styles.greeting}>Welcome Back</Text>
+        <Text style={styles.welcome}>Sign in to continue</Text>
 
-      {/* Password Input */}
-      <View style={styles.inputRow}>
-        <Icon name="lock" size={20} color="#666" style={styles.inputIcon} />
-        <TextInput
-          style={[styles.input, styles.inputWithIcon]}
-          placeholder="Password"
-          value={password}
-          onChangeText={t => {
-            setPasword(t);
-            if (passwordError) setPasswordError(null);
-          }}
-          onBlur={() => setPasswordError(validatePassword(password))}
-          secureTextEntry
-        />
-      </View>
-      {passwordError ? (
-        <Text style={styles.errorText}>{passwordError}</Text>
-      ) : null}
+        {/* Email Input*/}
+        <View style={styles.inputRow}>
+          <Icon name="email" size={20} color="#666" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            keyboardType="email-address"
+            value={email}
+            autoCapitalize='none'
+            autoCorrect={false}
+            editable={true}
+            onChangeText={t => {
+              setEmail(t);
+              if (emailError) setEmailError(null);
+            }}
+            onBlur={() => setEmailError(validateEmail(email))}
+          />
+        </View>
+        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
-      {/* Forgot Password Link */}
-      <TouchableOpacity>
-        <Text style={styles.forgot}>Forgot Password?</Text>
-      </TouchableOpacity>
+        {/* Password Input */}
+        <View style={styles.inputRow}>
+          <Icon name="lock" size={20} color="#666" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={t => {
+              setPasword(t);
+              if (passwordError) setPasswordError(null);
+            }}
+            onBlur={() => setPasswordError(validatePassword(password))}
+            secureTextEntry ={!showPassword}
+          />
+          {/*Show or Hide Password Entry*/}
+          <TouchableOpacity onPress={() => setShowPassword(s => !s)}
+          style={styles.rightIconTouchable}
+          activeOpacity={0.7}
+          >
+            <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} color='#666'/>
+          </TouchableOpacity>
+        </View>
+        {passwordError ? (
+          <Text style={styles.errorText}>{passwordError}</Text>
+        ) : null}
 
-      {/*Sign In Button */}
-      <TouchableOpacity
-        style={[
-          styles.button,
-          (validateEmail(email) || validatePassword(password)) &&
-            styles.buttonDisabled,
-        ]}
-        onPress={handleLogin}
-        activeOpacity={0.8}
-        disabled={!!(validateEmail(email) || validatePassword(password))}
-      >
-        <Text style={styles.buttonText}> Sign In</Text>
-      </TouchableOpacity>
-
-      {/* Bottom Text */}
-      <View style={styles.bottomText}>
-        <Text>Don't have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-          <Text style={styles.signup}>Sign Up</Text>
+        {/* Forgot Password Link */}
+        <TouchableOpacity>
+          <Text style={styles.forgot}>Forgot Password?</Text>
         </TouchableOpacity>
-      </View>
-      {/* Separator */}
-      <View style={styles.separatorContainer}>
-        <View style={styles.line}>
-          <Text style={{ textAlign: 'center', marginVertical: 10 }}>OR</Text>
+
+        {/*Sign In Button */}
+        <TouchableOpacity
+          style={[
+            styles.button,
+            (validateEmail(email) || validatePassword(password)) &&
+              styles.buttonDisabled,
+          ]}
+          onPress={handleLogin}
+          activeOpacity={0.8}
+          disabled={
+            !!(validateEmail(email) || validatePassword(password) || loading)
+          }
+        >
+          {loading ? (
+            <ActivityIndicator color="#f4fbf8ff" />
+          ) : (
+            <Text style={styles.buttonText}> Sign In</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Bottom Text */}
+        <View style={styles.bottomText}>
+          <Text>Don't have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+            <Text style={styles.signup}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
+        {/* Separator */}
+        <View style={styles.separatorContainer}>
+          <View style={styles.line}>
+            <Text style={{ textAlign: 'center', marginVertical: 10 }}>OR</Text>
+          </View>
+        </View>
+
+        {/* Social Media Sign In */}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 6,
+            marginBottom: 20,
+          }}
+        >
+          <Text style={{ fontSize: 14 }}>Sign in with</Text>
+
+          <Image
+            source={require('../assets/google.png')}
+            style={{
+              width: 30,
+              height: 30,
+              marginLeft: 10,
+              resizeMode: 'contain',
+            }}
+          />
+          <Image
+            source={require('../assets/apple.png')}
+            style={{
+              width: 30,
+              height: 30,
+              marginLeft: 10,
+              resizeMode: 'contain',
+            }}
+          />
+          <Image
+            source={require('../assets/linkedin.png')}
+            style={{
+              width: 30,
+              height: 30,
+              marginLeft: 10,
+              resizeMode: 'contain',
+            }}
+          />
         </View>
       </View>
-
-      {/* Social Media Sign In */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: 6,
-          marginBottom: 20,
-        }}
-      >
-        <Text style={{ fontSize: 14 }}>Sign in with</Text>
-
-        <Image
-          source={require('../assets/google.png')}
-          style={{
-            width: 30,
-            height: 30,
-            marginLeft: 10,
-            resizeMode: 'contain',
-          }}
-        />
-        <Image
-          source={require('../assets/apple.png')}
-          style={{
-            width: 30,
-            height: 30,
-            marginLeft: 10,
-            resizeMode: 'contain',
-          }}
-        />
-        <Image
-          source={require('../assets/linkedin.png')}
-          style={{
-            width: 30,
-            height: 30,
-            marginLeft: 10,
-            resizeMode: 'contain',
-          }}
-        />
-      </View>
-    </View>
+    </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -180,8 +216,7 @@ export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 18,
-    backgroundColor: '#ffffff',
+    padding: 16,
     justifyContent: 'center',
   },
   welcome: {
@@ -198,15 +233,10 @@ const styles = StyleSheet.create({
     color: '#1C457A',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
-    borderRadius: 13,
+    flex: 1,
+     alignSelf: 'stretch',
     width: '100%',
-    marginTop: 6,
-    minHeight: 50,
-    textAlignVertical: 'top',
-    backgroundColor: '#fff',
+    height: 45,
   },
   forgot: {
     textAlign: 'right',
@@ -256,16 +286,15 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 10,
     marginBottom: 10,
-  },
+  }, 
   inputIcon: {
-    position: 'absolute',
-    left: 12,
-    top: 14,
-    zIndex: 2,
+    marginRight: 8,
   },
-  inputWithIcon: { paddingLeft: 40 },
   errorText: {
     color: '#d32f2f',
     marginTop: 4,
@@ -275,5 +304,11 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: '#97b8df',
+  },
+  rightIconTouchable:{
+    position: 'absolute',
+    right: 12,
+    top: 11,
+    zIndex: 2,
   },
 });

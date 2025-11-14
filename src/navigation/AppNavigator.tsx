@@ -7,9 +7,11 @@ import MainTabs from './MainTabs';
 import { Ticket } from '../redux/slice/ticketSlice';
 import SignUpScreen from '../screens/SignUpScreen';
 import useAuth from '../hooks/useAuth';
+import SplashScreen from '../screens/SplashScreen';
 
 
 export type RootStackParamList = {
+    Splash: undefined;
     SignUp:  undefined;
     Login: undefined;
     MainTabs: undefined;
@@ -26,9 +28,10 @@ const AppNavigator = () => {
     return (
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="Login"
+          initialRouteName="Splash"
           screenOptions={{ headerShown: false }}
         >
+          <Stack.Screen name="Splash" component={SplashScreen}/>
           <Stack.Screen name="SignUp" component={SignUpScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
         </Stack.Navigator>

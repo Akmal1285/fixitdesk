@@ -78,8 +78,8 @@ const CreateTicketScreen: React.FC<DashboardProps> = ({ navigation }) => {
   };
 
   const onSubmit = (data: TicketFormValues) => {
-    console.log('SUBMIT data.priority =>', data.priority);
-    console.log('🟩 priority selected:', data.priority);
+    //console.log('SUBMIT data.priority =>', data.priority);
+    //console.log('🟩 priority selected:', data.priority);
     dispatch(
       createTicket({
         title: data.title,
@@ -107,7 +107,7 @@ const CreateTicketScreen: React.FC<DashboardProps> = ({ navigation }) => {
     { label: 'Hardware', value: 'Hardware' },
   ]);
 
-  //const [priorityValue, setPriorityValue] = useState<TicketPriority>('medium');
+
   const [priorityOptions, setPriorityOptions] = useState([
     { label: 'Low', value: 'Low' },
     { label: 'Medium', value: 'Medium' },
