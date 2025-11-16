@@ -85,3 +85,4 @@ ios/tmp.xcconfig
 
 #Google services
 google-services.json
+src/screens/Animation.tsx

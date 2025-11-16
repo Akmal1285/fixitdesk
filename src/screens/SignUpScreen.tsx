@@ -48,17 +48,10 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  //Handle back button press
-  const handleBack = () => {
-    navigation.goBack();
-  };
+  
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-        <Icon name="arrow-left" size={30} color="#fff" />
-      </TouchableOpacity>
 
       {/* Headline */}
       <View style={{ marginTop: 20, marginBottom: 10 }}>

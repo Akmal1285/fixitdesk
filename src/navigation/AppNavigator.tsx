@@ -8,37 +8,50 @@ import { Ticket } from '../redux/slice/ticketSlice';
 import SignUpScreen from '../screens/SignUpScreen';
 import useAuth from '../hooks/useAuth';
 import SplashScreen from '../screens/SplashScreen';
-
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 
 export type RootStackParamList = {
-    Splash: undefined;
-    SignUp:  undefined;
-    Login: undefined;
-    MainTabs: undefined;
-    TicketDetails: { ticket: Ticket }; 
+  Reset: undefined;
+  Splash: undefined;
+  SignUp: undefined;
+  Login: undefined;
+  MainTabs: undefined;
+  TicketDetails: { ticket: Ticket };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-
 const AppNavigator = () => {
-    const user = useAuth();
+  const user = useAuth();
 
-     if (user === undefined || user === null) {
+  // 1. Still loading user state → show only splash
+  if (user === undefined) {
     return (
       <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Splash"
-          screenOptions={{ headerShown: false }}
-        >
-          <Stack.Screen name="Splash" component={SplashScreen}/>
-          <Stack.Screen name="SignUp" component={SignUpScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Splash" component={SplashScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     );
   }
 
+  // 2. User not logged in → show auth screens
+  if (user === null) {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="Login"
+          screenOptions={{ headerShown: false }}
+        >
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="SignUp" component={SignUpScreen} />
+          <Stack.Screen name="Reset" component={ForgotPasswordScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
+
+  // 3. User logged in → main app
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -50,7 +63,6 @@ const AppNavigator = () => {
       </Stack.Navigator>
     </NavigationContainer>
   );
-
 };
 
 export default AppNavigator;
