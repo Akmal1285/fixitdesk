@@ -6,6 +6,7 @@ import auth from "@react-native-firebase/auth";
 
 const useAuth = () => {
     const [user, setUser] = useState<any | null>(undefined);
+    
 
    useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((firebaseUser:any

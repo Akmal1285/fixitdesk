@@ -13,14 +13,16 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
 import { RootState } from '../redux/store/store';
 import { useSelector } from 'react-redux';
+import auth from '@react-native-firebase/auth';
 
 type DashboardProps = BottomTabScreenProps<MainTabsParamList, 'Dashboard'>;
 
 const DashboardScreen: React.FC<DashboardProps> = () => {
   const navigation = useNavigation<any>();
-
   const tickets = useSelector((state: RootState) => state.tickets.tickets);
+  const user = auth().currentUser; //Get user profile
 
+  //Ticket list
   const renderTicket = ({ item }: { item: any }) => (
     <TouchableOpacity
       style={styles.card}
@@ -87,8 +89,12 @@ const DashboardScreen: React.FC<DashboardProps> = () => {
     <View style={styles.container}>
       {/*Screen Title*/}
       <Text style={styles.text}> Dashboard</Text>
+      
       {/*Welcome Text*/}
-      <Text style={styles.welcome}>Welcome Back, James!</Text>
+      <View style={{flexDirection:'row', justifyContent:'center'}}>
+      <Text style={styles.welcome}>Welcome Back,</Text>
+      <Text style={styles.profile}>{user?.displayName??'loading'}</Text>
+      </View>
 
       {/* Filter Buttons */}
       <View
@@ -193,6 +199,12 @@ const styles = StyleSheet.create({
     color: '#1976D2',
     marginBottom: 10,
   },
+   profile: {
+    marginLeft:6,
+    fontSize:14,
+    fontWeight:700,
+    color: '#1976D2',
+   },
   ticketStatus: {
     fontWeight: '600',
     fontSize: 14,

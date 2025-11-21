@@ -24,6 +24,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const AppNavigator = () => {
   const user = useAuth();
 
+  //To do: loading screen , fix auto navigation bug
   // 1. Still loading user state → show only splash
   if (user === undefined) {
     return (
@@ -35,7 +36,7 @@ const AppNavigator = () => {
     );
   }
 
-  // 2. User not logged in → show auth screens
+  // 2. User is null shows auth screen
   if (user === null) {
     return (
       <NavigationContainer>
@@ -43,6 +44,7 @@ const AppNavigator = () => {
           initialRouteName="Login"
           screenOptions={{ headerShown: false }}
         >
+          <Stack.Screen name="Splash" component={SplashScreen}/>
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="SignUp" component={SignUpScreen} />
           <Stack.Screen name="Reset" component={ForgotPasswordScreen} />

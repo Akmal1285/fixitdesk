@@ -12,12 +12,9 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import {
-  createUserWithEmailAndPassword,
-  getAuth,
-} from '@react-native-firebase/auth';
+import { createUserWithEmailAndPassword } from '@react-native-firebase/auth';
 import { validateEmail, validatePassword } from '../utils';
-
+import auth from '@react-native-firebase/auth';
 type Props = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
 
 const SignUpScreen: React.FC<Props> = ({ navigation }) => {
@@ -29,7 +26,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   //Handle sign up
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (email && password) {
       try {
         // Validate email and password
@@ -40,19 +37,28 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
 
         if (eErr || pErr) return;
 
-        createUserWithEmailAndPassword(getAuth(), email, password);
+        // 1. Create user (wait until Firebase finishes)
+        const userCredential = await createUserWithEmailAndPassword(
+          auth(),
+          email,
+          password,
+        );
+
+        // 2. Update display name
+        await userCredential.user.updateProfile({
+          displayName: name,
+        });
+
         Alert.alert('Successfully registered');
-      } catch {
-        console.log('Error', Error);
+      } catch (error: any) {
+        console.log('Error:', error.message);
+        Alert.alert('Sign Up Error', error.message);
       }
     }
   };
 
-  
-
   return (
     <View style={styles.container}>
-
       {/* Headline */}
       <View style={{ marginTop: 20, marginBottom: 10 }}>
         <Text style={styles.Headline}> Create Account</Text>
@@ -101,11 +107,15 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
         />
         {/*Show or Hide Password Entry*/}
         <TouchableOpacity
-        onPress={() => setShowPassword(s => !s)}
-        style={styles.rightIconTouchable}
-        activeOpacity={0.7}
+          onPress={() => setShowPassword(s => !s)}
+          style={styles.rightIconTouchable}
+          activeOpacity={0.7}
         >
-          <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} color="#666"/>
+          <Icon
+            name={showPassword ? 'eye-off' : 'eye'}
+            size={20}
+            color="#666"
+          />
         </TouchableOpacity>
       </View>
       {passwordError ? (
@@ -120,11 +130,11 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
             styles.buttonDisabled,
         ]}
       >
-        <TouchableOpacity onPress={handleSignUp}
-        activeOpacity={0.8}
-        disabled={
-          !!(validateEmail(email) || validatePassword(password))
-        }>
+        <TouchableOpacity
+          onPress={handleSignUp}
+          activeOpacity={0.8}
+          disabled={!!(validateEmail(email) || validatePassword(password))}
+        >
           <Text style={styles.buttonText}>Create Account</Text>
         </TouchableOpacity>
       </View>
@@ -194,7 +204,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 70,
   },
-  Headline: { fontSize: 24, fontWeight: 'bold', textAlign:'center' },
+  Headline: { fontSize: 24, fontWeight: 'bold', textAlign: 'center' },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -212,9 +222,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 90,
     borderRadius: 20,
-    alignSelf:'center',
+    alignSelf: 'center',
   },
-  buttonText: { color: '#fff', fontWeight: '600', fontSize: 16, alignContent:'center' },
+  buttonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+    alignContent: 'center',
+  },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -228,7 +243,12 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   inputWithIcon: { paddingLeft: 40 },
-  instructText: { fontSize: 14, color: '#424141ff', marginBottom: 30 , textAlign:'center'},
+  instructText: {
+    fontSize: 14,
+    color: '#424141ff',
+    marginBottom: 30,
+    textAlign: 'center',
+  },
   bottomText: { flexDirection: 'row', justifyContent: 'center', marginTop: 20 },
   signIn: { color: '#1976D2', fontWeight: 'bold', marginLeft: 5 },
   backButton: {
@@ -265,7 +285,7 @@ const styles = StyleSheet.create({
   buttonDisabled: {
     backgroundColor: '#97b8df',
   },
-  rightIconTouchable:{
+  rightIconTouchable: {
     position: 'absolute',
     right: 12,
     top: 14,

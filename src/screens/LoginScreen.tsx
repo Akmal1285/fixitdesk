@@ -57,7 +57,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       } catch (error: any) {
         setLoading(false);
         console.error('Login error:', error.message);
-        Alert.alert('Login Error : Wrong Credentials');
+        Alert.alert('Login Error:',error.message);
       }
     }
   };

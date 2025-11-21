@@ -7,7 +7,7 @@ import {
   STORAGE_BUCKET,
   MESSAGING_SENDER_ID,
   APP_ID
-} from '@env';
+} from '@env'; 
 
 const firebaseConfig = {
   apiKey: API_KEY,
